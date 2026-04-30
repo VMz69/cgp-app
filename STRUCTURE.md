@@ -1,6 +1,7 @@
 # Estructura de Carpetas - CGP App
 
 ## Descripción General
+
 Esta es una aplicación móvil de gestión de gastos personales construida con Expo Router y React Native.
 
 ## Estructura del Proyecto
@@ -8,75 +9,67 @@ Esta es una aplicación móvil de gestión de gastos personales construida con E
 ```
 cgp-app/
 │
-├── app/                          # Rutas (Expo Router)
-│   ├── _layout.tsx               # Root layout con control de auth
+├── app/
+│   ├── _layout.tsx
 │
-│   ├── (auth)/                   # Grupo autenticación
-│   │   ├── _layout.tsx           # Layout de auth
-│   │   ├── login.tsx             # Pantalla de login
-│   │   └── register.tsx          # Pantalla de registro
+│   ├── (auth)/
+│   │   ├── _layout.tsx
+│   │   ├── login.tsx
+│   │   └── register.tsx
 │
-│   ├── (tabs)/                   # App principal con navegación por tabs
-│   │   ├── _layout.tsx           # Configuración de tabs
-│   │   ├── index.tsx             # Home / Resumen mensual
-│   │   ├── expenses.tsx          # Historial de gastos
-│   │   ├── add.tsx               # Agregar nuevo gasto
-│   │   └── explore.tsx           # (Componente opcional existente)
+│   ├── (tabs)/
+│   │   ├── _layout.tsx
+│   │   ├── index.tsx        # resumen mensual
+│   │   ├── expenses.tsx     # historial
+│   │   └── add.tsx          # agregar gasto
 │
-│   └── modal.tsx                 # (Componente modal opcional)
-│
-├── components/                   # Componentes reutilizables
-│   ├── FormInput.tsx             # Input de formulario
-│   ├── ExpenseItem.tsx           # Item de gasto
-│   ├── Button.tsx                # Botón personalizado
-│   └── ui/                       # Componentes de UI (theme)
-│
-├── hooks/                        # Hooks personalizados (lógica de negocio)
-│   ├── useAuth.ts                # Lógica de autenticación
-│   └── useExpenses.ts            # Lógica de gastos (CRUD)
-│
-├── lib/                          # Firebase y servicios (NO TOCAR SIN INDICACIÓN)
-│   ├── firebase.ts               # Configuración de Firebase
-│   ├── auth.ts                   # Funciones de login/register/logout
-│   └── expenses.ts               # Funciones CRUD de gastos
-│
-├── constants/                    # Datos estáticos y configuraciones
-│   ├── categories.ts             # Categorías de gastos
-│   └── theme.ts                  # Configuración de tema
-│
-├── assets/                       # Imágenes y recursos
-│   └── images/                   # Imágenes del proyecto
+├── components/
+│   ├── FormInput.tsx
+│   ├── ExpenseItem.tsx
+│   └── Button.tsx
 │
 ├── hooks/
-│   ├── use-color-scheme.ts       # Hook para tema claro/oscuro
-│   ├── use-theme-color.ts        # Hook para colores de tema
-│   └── useAuth.ts                # Hook de autenticación (TÚ)
-│   └── useExpenses.ts            # Hook de gastos (TÚ)
+│   ├── useAuth.ts
+│   └── useExpenses.ts
 │
-├── app.json                      # Configuración de Expo
-├── tsconfig.json                 # Configuración de TypeScript
-├── package.json                  # Dependencias del proyecto
-└── README.md                     # Documentación del proyecto
+├── lib/
+│   ├── firebase.ts
+│   ├── auth.ts
+│   └── expenses.ts
+│
+├── constants/
+│   └── categories.ts
+│
+├── assets/
+│
+├── app.json
+├── tsconfig.json
+├── package.json
+└── README.md
 ```
 
 ## Descripción de Responsabilidades
 
 ### Carpeta `app/`
+
 - **Root Layout**: Controla la navegación condicional basada en autenticación
 - **Auth Group**: Maneja login/register para usuarios no autenticados
 - **Tabs Group**: Pantallas principales de la app (solo usuarios autenticados)
 
 ### Carpeta `components/`
+
 - **Componentes reutilizables** del equipo
 - Enfoque en UI y presentación
 - Reciben datos como props
 
 ### Carpeta `hooks/`
+
 - **TÚ**: Aquí va la lógica puente entre componentes y servicios
 - `useAuth`: Maneja estado de autenticación
 - `useExpenses`: Maneja estado y operaciones de gastos
 
 ### Carpeta `lib/`
+
 - **INTOCABLE sin indicación específica** (contiene Firebase)
 - Funciones básicas de autenticación y CRUD
 - Comunicación con backend
@@ -84,24 +77,29 @@ cgp-app/
 ## Pantallas Principales
 
 ### 1. Pantalla de Login (`app/(auth)/login.tsx`)
+
 - Formulario de ingreso
 - Usa `useAuth()` para login
 
 ### 2. Pantalla de Registro (`app/(auth)/register.tsx`)
+
 - Formulario de nuevo usuario
 - Usa `useAuth()` para registro
 
 ### 3. Home/Resumen (`app/(tabs)/index.tsx`)
+
 - Resumen mensual de gastos
 - Estadísticas rápidas
 - Últimas transacciones
 
 ### 4. Historial de Gastos (`app/(tabs)/expenses.tsx`)
+
 - Lista completa de gastos
 - Filtrado y búsqueda (TODO)
 - Eliminación de gastos (TODO)
 
 ### 5. Agregar Gasto (`app/(tabs)/add.tsx`)
+
 - Formulario para nuevo gasto
 - Selección de categoría
 - Validaciones
@@ -109,6 +107,7 @@ cgp-app/
 ## Categorías de Gastos (`constants/categories.ts`)
 
 Disponibles:
+
 - 🍽️ Comida
 - 🚗 Transporte
 - 🛍️ Compras
@@ -121,17 +120,20 @@ Disponibles:
 ## Próximos Pasos
 
 ### TODO - Equipo (Componentes)
+
 - [ ] Mejorar diseño del formulario
 - [ ] Agregar validaciones en FormInput
 - [ ] Crear componentes de filtro
 
 ### TODO - TÚ (Hooks & Lógica)
+
 - [ ] Completar lógica de login
 - [ ] Implementar validaciones en useAuth
 - [ ] Agregar funcionalidad de filtrar gastos en useExpenses
 - [ ] Agregar paginación en gastos
 
 ### TODO - Firebase (Si aplica)
+
 - [ ] Conectar a Firebase real
 - [ ] Implementar seguridad en Firestore
 - [ ] Agregar autenticación con Google (opcional)
