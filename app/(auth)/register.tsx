@@ -14,9 +14,20 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     try {
+      if (!email.trim()) {
+        return Alert.alert("Error", "El email es obligatorio");
+      }
+
+      if (!password.trim()) {
+        return Alert.alert("Error", "La contraseña es obligatoria");
+      }
+
+      if (password.length < 6) {
+        return Alert.alert("Error", "Mínimo 6 caracteres");
+      }
+
       await register(email, password);
       await login(email, password);
-      //navegar a home
       router.replace("/");
     } catch (error: any) {
       Alert.alert("Error", error.message);

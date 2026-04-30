@@ -13,8 +13,15 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
+      if (!email.trim()) {
+        return Alert.alert("Error", "El email es obligatorio");
+      }
+
+      if (!password.trim()) {
+        return Alert.alert("Error", "La contraseña es obligatoria");
+      }
+
       await login(email, password);
-      //NAVEGACION
       router.replace("/");
     } catch (error: any) {
       Alert.alert("Error", error.message);

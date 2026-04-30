@@ -1,5 +1,3 @@
-// lib/expenses.ts
-
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
@@ -15,7 +13,13 @@ export const addExpense = async (
   try {
     const user = auth.currentUser;
 
-    if (!user) return;
+    // 🔴 Validación crítica backend
+    if (!user) throw new Error("Usuario no autenticado");
+
+    // 🔴 Seguridad extra (aunque ya validaste en UI)
+    if (!name || amount <= 0) {
+      throw new Error("Datos inválidos");
+    }
 
     await addDoc(collection(db, "expenses"), {
       name,
@@ -31,7 +35,7 @@ export const addExpense = async (
 };
 
 /**
- * 🔹 Obtener gastos del usuario
+ * 🔹 Obtener gastos
  */
 export const getExpenses = async () => {
   try {

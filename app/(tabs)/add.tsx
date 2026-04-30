@@ -13,10 +13,35 @@ export default function Add() {
 
   const handleAdd = async () => {
     try {
+      // 🔴 VALIDACIONES
+
+      // 1. Nombre vacío
+      if (!name.trim()) {
+        return Alert.alert("Error", "El nombre es obligatorio");
+      }
+
+      // 2. Monto vacío
+      if (!amount.trim()) {
+        return Alert.alert("Error", "El monto es obligatorio");
+      }
+
+      const numericAmount = Number(amount);
+
+      // 3. Monto no numérico
+      if (isNaN(numericAmount)) {
+        return Alert.alert("Error", "El monto debe ser un número");
+      }
+
+      // 4. Monto <= 0
+      if (numericAmount <= 0) {
+        return Alert.alert("Error", "El monto debe ser mayor a 0");
+      }
+
+      // 🔹 Si pasa validaciones → guardar
       await addExpense(
-        name,
-        Number(amount),
-        category, // 🔥 AQUÍ estaba el error
+        name.trim(),
+        numericAmount,
+        category,
         new Date().toISOString(),
       );
 
@@ -46,7 +71,7 @@ export default function Add() {
       <Text>Categoría</Text>
       <Picker
         selectedValue={category}
-        onValueChange={(itemValue) => setCategory(itemValue)}
+        onValueChange={(itemValue: string) => setCategory(itemValue)}
       >
         {EXPENSE_CATEGORIES.map((cat) => (
           <Picker.Item
