@@ -1,107 +1,183 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
-
-import { HelloWave } from "@/components/hello-wave";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { Button } from "@/components/Button";
+import { useExpenses } from "@/hooks/useExpenses";
 import { Link } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Hello World</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </ThemedText>{" "}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction
-              title="Action"
-              icon="cube"
-              onPress={() => alert("Action pressed")}
-            />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert("Share pressed")}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert("Delete pressed")}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { expenses } = useExpenses();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">
-            npm run reset-project
-          </ThemedText>{" "}
-          to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-          directory. This will move the current{" "}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const currentMonth = new Date().toLocaleDateString("es-ES", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const recentExpenses = expenses.slice(0, 5);
+
+  return (
+    <ScrollView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.monthTitle}>Resumen - {currentMonth}</Text>
+      </View>
+
+      {/* Total Expenses Card */}
+      <View style={styles.card}>
+        <Text style={styles.cardLabel}>Total del mes</Text>
+        <Text style={styles.totalAmount}>${totalExpenses.toFixed(2)}</Text>
+      </View>
+
+      {/* Quick Stats */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statBox}>
+          <Text style={styles.statNumber}>{expenses.length}</Text>
+          <Text style={styles.statLabel}>Transacciones</Text>
+        </View>
+        <View style={styles.statBox}>
+          <Text style={styles.statNumber}>
+            ${(totalExpenses / (expenses.length || 1)).toFixed(2)}
+          </Text>
+          <Text style={styles.statLabel}>Promedio</Text>
+        </View>
+      </View>
+
+      {/* Recent Expenses */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Gastos Recientes</Text>
+        {recentExpenses.length > 0 ? (
+          recentExpenses.map((expense) => (
+            <View key={expense.id} style={styles.expenseRow}>
+              <View>
+                <Text style={styles.expenseDesc}>{expense.description}</Text>
+                <Text style={styles.expenseCategory}>{expense.category}</Text>
+              </View>
+              <Text style={styles.expenseAmount}>
+                ${expense.amount.toFixed(2)}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>Sin gastos registrados</Text>
+        )}
+      </View>
+
+      {/* Quick Actions */}
+      <View style={styles.actionsContainer}>
+        <Link href="/(tabs)/add" asChild>
+          <Button title="Agregar Gasto" onPress={() => {}} />
+        </Link>
+        <Link href="/(tabs)/expenses" asChild>
+          <Button
+            title="Ver Historial"
+            variant="secondary"
+            onPress={() => {}}
+          />
+        </Link>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
   },
-  stepContainer: {
-    gap: 8,
+  header: {
+    paddingTop: 24,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  monthTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#333",
+  },
+  card: {
+    margin: 16,
+    padding: 20,
+    backgroundColor: "#3498db",
+    borderRadius: 12,
+    elevation: 3,
+  },
+  cardLabel: {
+    fontSize: 14,
+    color: "#fff",
+    opacity: 0.8,
+  },
+  totalAmount: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: "#fff",
+    marginTop: 8,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#3498db",
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 8,
+  },
+  section: {
+    marginTop: 20,
+    marginHorizontal: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#333",
+  },
+  expenseRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  expenseDesc: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#333",
+  },
+  expenseCategory: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 4,
+  },
+  expenseAmount: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#e74c3c",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#999",
+    paddingVertical: 20,
+  },
+  actionsContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    gap: 12,
   },
 });
