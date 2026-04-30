@@ -1,68 +1,53 @@
-// import {
-//   createUserWithEmailAndPassword,
-//   signInWithEmailAndPassword,
-//   signOut,
-// } from 'firebase/auth';
-// import { auth } from './firebase';
+// lib/auth.ts
 
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-}
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { auth } from "./firebase";
 
-// export async function login(email: string, password: string): Promise<User> {
-//   const userCredential = await signInWithEmailAndPassword(auth, email, password);
-//   return {
-//     id: userCredential.user.uid,
-//     email: userCredential.user.email || '',
-//     name: userCredential.user.displayName || undefined,
-//   };
-// }
+/**
+ * 🔹 Registrar usuario
+ */
+export const register = async (email: string, password: string) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
 
-// export async function register(
-//   email: string,
-//   password: string,
-//   name: string
-// ): Promise<User> {
-//   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-//   return {
-//     id: userCredential.user.uid,
-//     email: userCredential.user.email || '',
-//     name: name,
-//   };
-// }
+    return userCredential.user;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
 
-// export async function logout(): Promise<void> {
-//   await signOut(auth);
-// }
+/**
+ * 🔹 Iniciar sesión
+ */
+export const login = async (email: string, password: string) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
 
-// Mock functions para desarrollo
-export async function login(email: string, password: string): Promise<User> {
-  // Mock implementation
-  console.log("Login:", email);
-  return {
-    id: "1",
-    email: email,
-    name: "Test User",
-  };
-}
+    return userCredential.user;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
 
-export async function register(
-  email: string,
-  password: string,
-  name: string,
-): Promise<User> {
-  // Mock implementation
-  console.log("Register:", email, name);
-  return {
-    id: "1",
-    email: email,
-    name: name,
-  };
-}
-
-export async function logout(): Promise<void> {
-  // Mock implementation
-  console.log("Logout");
-}
+/**
+ * 🔹 Cerrar sesión
+ */
+export const logout = async () => {
+  try {
+    await signOut(auth);
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};

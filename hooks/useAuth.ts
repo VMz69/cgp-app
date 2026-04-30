@@ -1,74 +1,32 @@
-import * as AuthService from "@/lib/auth";
-import { useState } from "react";
+// hooks/useAuth.ts
 
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-}
+import { onAuthStateChanged, User } from "firebase/auth";
+import { useEffect, useState } from "react";
+import * as AuthService from "../lib/auth";
+import { auth } from "../lib/firebase";
 
-export function useAuth() {
+/**
+ * Hook de autenticación global
+ */
+export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const userData = await AuthService.login(email, password);
-      setUser(userData);
-      return userData;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Error de login";
-      setError(errorMessage);
-      throw err;
-    } finally {
+  // 🔹 Detectar usuario logueado automáticamente
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       setLoading(false);
-    }
-  };
+    });
 
-  const register = async (email: string, password: string, name: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const userData = await AuthService.register(email, password, name);
-      setUser(userData);
-      return userData;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Error de registro";
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      setLoading(true);
-      await AuthService.logout();
-      setUser(null);
-      setError(null);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Error de logout";
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+    return unsubscribe;
+  }, []);
 
   return {
     user,
     loading,
-    error,
-    login,
-    register,
-    logout,
-    isAuthenticated: !!user,
+    login: AuthService.login,
+    register: AuthService.register,
+    logout: AuthService.logout,
   };
-}
+};

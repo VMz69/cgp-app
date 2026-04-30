@@ -1,27 +1,44 @@
-import { useAuth } from "@/hooks/useAuth";
-import { StyleSheet, Text, View } from "react-native";
+// app/(auth)/register.tsx
+
+import { Link, useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Button, Text, TextInput, View } from "react-native";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function RegisterScreen() {
-  const { register } = useAuth();
+  const { register, login } = useAuth();
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleRegister = async () => {
+    try {
+      await register(email, password);
+      await login(email, password);
+      //navegar a home
+      router.replace("/");
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
-      {/* TODO: Agregar FormInput y Button aquí */}
+    <View style={{ padding: 20 }}>
+      <Text>Registro</Text>
+
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
+
+      <TextInput
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <Button title="Registrar" onPress={handleRegister} />
+
+      <Link href="/login">Ir a login</Link>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-});

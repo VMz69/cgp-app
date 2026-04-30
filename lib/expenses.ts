@@ -1,98 +1,62 @@
-// import {
-//   collection,
-//   addDoc,
-//   getDocs,
-//   deleteDoc,
-//   doc,
-//   query,
-//   where,
-//   Timestamp,
-// } from 'firebase/firestore';
-// import { firestore, auth } from './firebase';
+// lib/expenses.ts
 
-interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: string;
-  userId?: string;
-}
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { auth, db } from "./firebase";
 
-// export async function getExpenses(): Promise<Expense[]> {
-//   const user = auth.currentUser;
-//   if (!user) throw new Error('User not authenticated');
+/**
+ * 🔹 Agregar gasto
+ */
+export const addExpense = async (
+  name: string,
+  amount: number,
+  category: string,
+  date: string,
+) => {
+  try {
+    const user = auth.currentUser;
 
-//   const q = query(
-//     collection(firestore, 'expenses'),
-//     where('userId', '==', user.uid)
-//   );
-//   const snapshot = await getDocs(q);
-//   return snapshot.docs.map((doc) => ({
-//     id: doc.id,
-//     ...doc.data(),
-//   } as Expense));
-// }
+    if (!user) throw new Error("No autenticado");
 
-// export async function createExpense(
-//   expense: Omit<Expense, 'id'>
-// ): Promise<Expense> {
-//   const user = auth.currentUser;
-//   if (!user) throw new Error('User not authenticated');
+    await addDoc(collection(db, "expenses"), {
+      name,
+      amount,
+      category,
+      date,
+      userId: user.uid,
+      createdAt: new Date(),
+    });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
 
-//   const docRef = await addDoc(collection(firestore, 'expenses'), {
-//     ...expense,
-//     userId: user.uid,
-//     createdAt: Timestamp.now(),
-//   });
+/**
+ * 🔹 Obtener gastos del usuario
+ */
+export const getExpenses = async () => {
+  try {
+    const user = auth.currentUser;
 
-//   return {
-//     id: docRef.id,
-//     ...expense,
-//   };
-// }
+    if (!user) throw new Error("No autenticado");
 
-// export async function deleteExpense(id: string): Promise<void> {
-//   const user = auth.currentUser;
-//   if (!user) throw new Error('User not authenticated');
+    const q = query(
+      collection(db, "expenses"),
+      where("userId", "==", user.uid),
+    );
 
-//   await deleteDoc(doc(firestore, 'expenses', id));
-// }
+    const querySnapshot = await getDocs(q);
 
-// Mock functions para desarrollo
-export async function getExpenses(): Promise<Expense[]> {
-  // Mock implementation
-  console.log("Getting expenses");
-  return [
-    {
-      id: "1",
-      description: "Café",
-      amount: 5.0,
-      category: "Comida",
-      date: "2024-01-15",
-    },
-    {
-      id: "2",
-      description: "Gasolina",
-      amount: 45.0,
-      category: "Transporte",
-      date: "2024-01-14",
-    },
-  ];
-}
+    const expenses: any[] = [];
 
-export async function createExpense(
-  expense: Omit<Expense, "id">,
-): Promise<Expense> {
-  // Mock implementation
-  console.log("Creating expense:", expense);
-  return {
-    id: Date.now().toString(),
-    ...expense,
-  };
-}
+    querySnapshot.forEach((doc) => {
+      expenses.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
 
-export async function deleteExpense(id: string): Promise<void> {
-  // Mock implementation
-  console.log("Deleting expense:", id);
-}
+    return expenses;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};

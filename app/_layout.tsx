@@ -1,39 +1,31 @@
-import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
-} from "@react-navigation/native";
+// app/_layout.tsx
+
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import "react-native-reanimated";
-
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useAuth } from "@/hooks/useAuth";
-
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
+import { ActivityIndicator, View } from "react-native";
+import { useAuth } from "../hooks/useAuth";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const { isAuthenticated } = useAuth();
+  const { user, loading } = useAuth();
+
+  // 🔹 Mientras carga estado de auth
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        {isAuthenticated ? (
-          <>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="modal"
-              options={{ presentation: "modal", title: "Modal" }}
-            />
-          </>
-        ) : (
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        )}
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* 🔹 Si NO hay usuario → auth */}
+      {!user ? (
+        <Stack.Screen name="(auth)" />
+      ) : (
+        // 🔹 Si hay usuario → app
+        <Stack.Screen name="(tabs)" />
+      )}
+      console.log(user);
+    </Stack>
   );
 }

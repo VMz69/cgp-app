@@ -1,31 +1,39 @@
-import { Button } from "@/components/Button";
-import { FormInput } from "@/components/FormInput";
-import { useExpenses } from "@/hooks/useExpenses";
-import { StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, Button, TextInput, View } from "react-native";
+import { useExpenses } from "../../hooks/useExpenses";
 
-export default function AddScreen() {
+export default function Add() {
   const { addExpense } = useExpenses();
 
+  const [name, setName] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const handleAdd = async () => {
+    try {
+      await addExpense(
+        name,
+        Number(amount),
+        "general",
+        new Date().toISOString(),
+      );
+
+      Alert.alert("OK", "Gasto guardado");
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Agregar Gasto</Text>
-      {/* TODO: Agregar formulario para nuevo gasto */}
-      <FormInput placeholder="Descripción" />
-      <FormInput placeholder="Monto" keyboardType="decimal-pad" />
-      <Button title="Guardar Gasto" onPress={() => {}} />
+    <View style={{ padding: 20 }}>
+      <TextInput placeholder="Nombre" value={name} onChangeText={setName} />
+      <TextInput
+        placeholder="Monto"
+        value={amount}
+        onChangeText={setAmount}
+        keyboardType="numeric"
+      />
+
+      <Button title="Guardar" onPress={handleAdd} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-});
