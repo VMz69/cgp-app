@@ -15,7 +15,7 @@ export const addExpense = async (
   try {
     const user = auth.currentUser;
 
-    if (!user) throw new Error("No autenticado");
+    if (!user) return;
 
     await addDoc(collection(db, "expenses"), {
       name,
@@ -37,7 +37,7 @@ export const getExpenses = async () => {
   try {
     const user = auth.currentUser;
 
-    if (!user) throw new Error("No autenticado");
+    if (!user) return [];
 
     const q = query(
       collection(db, "expenses"),

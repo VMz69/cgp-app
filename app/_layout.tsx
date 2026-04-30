@@ -1,13 +1,10 @@
-// app/_layout.tsx
-
 import { Stack } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
-import { useAuth } from "../hooks/useAuth";
+import { AuthProvider, useAuth } from "../hooks/useAuth";
 
-export default function RootLayout() {
+function RootNavigation() {
   const { user, loading } = useAuth();
 
-  // 🔹 Mientras carga estado de auth
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
@@ -17,15 +14,16 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {/* 🔹 Si NO hay usuario → auth */}
-      {!user ? (
-        <Stack.Screen name="(auth)" />
-      ) : (
-        // 🔹 Si hay usuario → app
-        <Stack.Screen name="(tabs)" />
-      )}
-      console.log(user);
+    <Stack key={user ? "user" : "guest"} screenOptions={{ headerShown: false }}>
+      {!user ? <Stack.Screen name="(auth)" /> : <Stack.Screen name="(tabs)" />}
     </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootNavigation />
+    </AuthProvider>
   );
 }
