@@ -36,13 +36,12 @@ export default function Expenses() {
     }, []),
   );
 
-  // Fernando — meses disponibles derivados de los gastos cargados
+  // Fernando — meses disponibles derivados de los gastos, usando partes de fecha locales
   const availableMonths = useMemo(() => {
     const months = new Set<string>();
     expenses.forEach((expense) => {
-      const date = new Date(expense.date);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      months.add(key);
+      const [year, month] = expense.date.split("T")[0].split("-");
+      months.add(`${year}-${month}`);
     });
     return Array.from(months).sort().reverse();
   }, [expenses]);
@@ -57,9 +56,8 @@ export default function Expenses() {
 
     if (filterMonth !== "all") {
       result = result.filter((e) => {
-        const date = new Date(e.date);
-        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-        return key === filterMonth;
+        const [year, month] = e.date.split("T")[0].split("-");
+        return `${year}-${month}` === filterMonth;
       });
     }
 
@@ -114,7 +112,10 @@ export default function Expenses() {
           {getCategoryLabel(item.category)}
         </Text>
         <Text style={styles.itemDate}>
-          {new Date(item.date).toLocaleDateString("es-ES")}
+          {(() => {
+            const [y, m, d] = item.date.split("T")[0].split("-").map(Number);
+            return new Date(y, m - 1, d).toLocaleDateString("es-ES");
+          })()}
         </Text>
       </View>
 

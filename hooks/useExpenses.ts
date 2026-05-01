@@ -22,12 +22,13 @@ export const useExpenses = () => {
   const getTotal = () =>
     expenses.reduce((acc, item) => acc + (item.amount || 0), 0);
 
-  // Fernando — total filtrado al mes y año actual
+  // Fernando — total filtrado al mes y año actual (fecha local para evitar desfase de timezone)
   const getMonthlyTotal = () => {
     const now = new Date();
     return expenses
       .filter((item) => {
-        const expenseDate = new Date(item.date);
+        const [y, m] = item.date.split("T")[0].split("-").map(Number);
+        const expenseDate = new Date(y, m - 1, 1);
         return (
           expenseDate.getMonth() === now.getMonth() &&
           expenseDate.getFullYear() === now.getFullYear()

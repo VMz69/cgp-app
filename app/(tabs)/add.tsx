@@ -27,7 +27,8 @@ export default function AddExpense() {
 
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState(EXPENSE_CATEGORIES[0].id);
+  // Fernando — categoría vacía para forzar al usuario a seleccionar explícitamente
+  const [category, setCategory] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -41,7 +42,7 @@ export default function AddExpense() {
       if (!id) {
         setName("");
         setAmount("");
-        setCategory(EXPENSE_CATEGORIES[0].id);
+        setCategory("");
         setDate(new Date().toISOString().split("T")[0]);
       }
     }, []),
@@ -87,8 +88,14 @@ export default function AddExpense() {
     if (!date.trim()) {
       return Alert.alert("Campo requerido", "La fecha es obligatoria");
     }
-    const parsedDate = new Date(date);
-    if (isNaN(parsedDate.getTime())) {
+    // Fernando — validar fecha creando Date local (evita desfase UTC)
+    const [y, m, d] = date.split("-").map(Number);
+    const parsedDate = new Date(y, m - 1, d);
+    if (
+      isNaN(parsedDate.getTime()) ||
+      parsedDate.getMonth() !== m - 1 ||
+      String(y).length !== 4
+    ) {
       return Alert.alert(
         "Fecha inválida",
         "Ingresa la fecha en formato AAAA-MM-DD (ejemplo: 2025-05-20)",
@@ -116,22 +123,15 @@ export default function AddExpense() {
           name: name.trim(),
           amount: numericAmount,
           category,
-          date: parsedDate.toISOString(),
+          date: date,
         });
         Alert.alert("¡Listo!", "Gasto actualizado correctamente");
         router.replace("/(tabs)/expenses");
       } else {
-        await addExpense(
-          name.trim(),
-          numericAmount,
-          category,
-          parsedDate.toISOString(),
-        );
-        Alert.alert("¡Listo!", "Gasto guardado correctamente");
-        setName("");
-        setAmount("");
-        setCategory(EXPENSE_CATEGORIES[0].id);
-        setDate(new Date().toISOString().split("T")[0]);
+        await addExpense(name.trim(), numericAmount, category, date);
+        Alert.alert("¡Listo!", "Gasto agregado correctamente", [
+          { text: "OK", onPress: () => router.replace("/(tabs)/expenses") },
+        ]);
       }
     } catch (error: any) {
       Alert.alert("Error", error.message);
@@ -165,13 +165,21 @@ export default function AddExpense() {
         placeholderTextColor="#aaa"
       />
 
-      {/* Fernando — selector de categoría */}
+      {/* Fernando — selector de categoría con placeholder inicial no seleccionable */}
       <Text style={styles.label}>Categoría *</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={category}
-          onValueChange={(value: string) => setCategory(value)}
+          onValueChange={(value: string) => {
+            if (value !== "") setCategory(value);
+          }}
         >
+          <Picker.Item
+            label="Seleccione una categoría..."
+            value=""
+            enabled={false}
+            color="#aaa"
+          />
           {EXPENSE_CATEGORIES.map((cat) => (
             <Picker.Item
               key={cat.id}
