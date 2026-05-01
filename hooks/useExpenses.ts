@@ -9,7 +9,6 @@ export const useExpenses = () => {
       const data = await ExpenseService.getExpenses();
       setExpenses(data);
     } catch (error) {
-      // 🔹 evita que la app reviente si algo falla
       setExpenses([]);
     }
   };
@@ -19,10 +18,30 @@ export const useExpenses = () => {
   }, []);
 
   /**
-   * 🔹 Total simple
+   * 🔹 Total general (todos los gastos)
    */
   const getTotal = () => {
     return expenses.reduce((acc, item) => acc + (item.amount || 0), 0);
+  };
+
+  /**
+   * Total del mes actual
+   */
+  const getMonthlyTotal = () => {
+    const now = new Date();
+
+    return expenses
+      .filter((item) => {
+        // 🔹 convertir fecha guardada a Date
+        const expenseDate = new Date(item.date);
+
+        // 🔹 comparar mes y año
+        return (
+          expenseDate.getMonth() === now.getMonth() &&
+          expenseDate.getFullYear() === now.getFullYear()
+        );
+      })
+      .reduce((acc, item) => acc + (item.amount || 0), 0);
   };
 
   return {
@@ -30,5 +49,6 @@ export const useExpenses = () => {
     loadExpenses,
     addExpense: ExpenseService.addExpense,
     total: getTotal(),
+    monthlyTotal: getMonthlyTotal(),
   };
 };
