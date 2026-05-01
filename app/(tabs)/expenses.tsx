@@ -1,9 +1,9 @@
+import { Picker } from "@react-native-picker/picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -143,101 +143,47 @@ export default function Expenses() {
     <View style={styles.container}>
       <Text style={styles.title}>Mis Gastos</Text>
 
-      {/* Fernando — filtro por categoría con chips horizontales */}
+      {/* Filtro por categoría */}
       <Text style={styles.filterLabel}>Categoría</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterScroll}
-      >
-        <TouchableOpacity
-          style={[styles.chip, filterCategory === "all" && styles.chipActive]}
-          onPress={() => setFilterCategory("all")}
+      <View style={styles.pickerWrapper}>
+        <Picker
+          selectedValue={filterCategory}
+          onValueChange={(value) => setFilterCategory(value)}
+          style={styles.picker}
         >
-          <Text
-            style={[
-              styles.chipText,
-              filterCategory === "all" && styles.chipTextActive,
-            ]}
-          >
-            Todas
-          </Text>
-        </TouchableOpacity>
-        {EXPENSE_CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat.id}
-            style={[
-              styles.chip,
-              filterCategory === cat.id && styles.chipActive,
-            ]}
-            onPress={() => setFilterCategory(cat.id)}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                filterCategory === cat.id && styles.chipTextActive,
-              ]}
-            >
-              {cat.icon} {cat.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+          <Picker.Item label="Todas las categorías" value="all" />
+          {EXPENSE_CATEGORIES.map((cat) => (
+            <Picker.Item
+              key={cat.id}
+              label={`${cat.icon} ${cat.label}`}
+              value={cat.id}
+            />
+          ))}
+        </Picker>
+      </View>
 
-      {/* Fernando — filtro por mes, visible solo si hay meses disponibles */}
-      {availableMonths.length > 0 && (
-        <>
-          <Text style={styles.filterLabel}>Mes</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.filterScroll}
-          >
-            <TouchableOpacity
-              style={[styles.chip, filterMonth === "all" && styles.chipActive]}
-              onPress={() => setFilterMonth("all")}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  filterMonth === "all" && styles.chipTextActive,
-                ]}
-              >
-                Todos
-              </Text>
-            </TouchableOpacity>
-            {availableMonths.map((month) => {
-              const [year, m] = month.split("-");
-              const label = new Date(
-                parseInt(year),
-                parseInt(m) - 1,
-              ).toLocaleDateString("es-ES", {
-                month: "short",
-                year: "numeric",
-              });
-              return (
-                <TouchableOpacity
-                  key={month}
-                  style={[
-                    styles.chip,
-                    filterMonth === month && styles.chipActive,
-                  ]}
-                  onPress={() => setFilterMonth(month)}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      filterMonth === month && styles.chipTextActive,
-                    ]}
-                  >
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </>
-      )}
+      {/* Filtro por mes */}
+      <Text style={styles.filterLabel}>Mes</Text>
+      <View style={styles.pickerWrapper}>
+        <Picker
+          selectedValue={filterMonth}
+          onValueChange={(value) => setFilterMonth(value)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Todos los meses" value="all" />
+          {availableMonths.map((month) => {
+            const [year, m] = month.split("-");
+            const label = new Date(
+              parseInt(year),
+              parseInt(m) - 1,
+            ).toLocaleDateString("es-ES", {
+              month: "long",
+              year: "numeric",
+            });
+            return <Picker.Item key={month} label={label} value={month} />;
+          })}
+        </Picker>
+      </View>
 
       {/* Fernando — selector de ordenamiento */}
       <Text style={styles.filterLabel}>Ordenar por</Text>
@@ -270,7 +216,7 @@ export default function Expenses() {
         </TouchableOpacity>
       </View>
 
-      {/* Fernando — lista filtrada y ordenada con mensaje vacío amigable */}
+      {/* Fernando — lista filtrada y ordenada con mensaje cuando este vacía */}
       <FlatList
         data={filteredExpenses}
         keyExtractor={(item) => item.id}
@@ -304,7 +250,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 4,
   },
-  filterScroll: { marginBottom: 4 },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    marginBottom: 10,
+    overflow: "hidden",
+    backgroundColor: "#f9f9f9",
+  },
+  picker: { height: 48 },
   sortRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
   chip: {
     paddingHorizontal: 12,
