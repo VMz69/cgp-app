@@ -1,17 +1,20 @@
-// app/(auth)/login.tsx
-
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Button, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
-import { useGoogleAuth } from "../../lib/googleAuth";
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, signInWithGoogle, user } = useAuth();
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { user, promptAsync } = useGoogleAuth();
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/");
+    }
+  }, [user]);
 
   const handleLogin = async () => {
     try {
@@ -24,7 +27,6 @@ export default function LoginScreen() {
       }
 
       await login(email, password);
-      router.replace("/");
     } catch (error: any) {
       Alert.alert("Error", error.message);
     }
@@ -44,7 +46,7 @@ export default function LoginScreen() {
       />
 
       <Button title="Login" onPress={handleLogin} />
-      <Button title="Login con Google" onPress={() => promptAsync()} />
+      <Button title="Login con Google" onPress={signInWithGoogle} />
 
       <Link href="/register">Ir a registro</Link>
     </View>

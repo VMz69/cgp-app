@@ -13,16 +13,12 @@ function RootNavigation() {
 
     const inAuthGroup = segments[0] === "(auth)";
 
-    // 🔴 NO LOGUEADO → FORZAR LOGIN
     if (!user && !inAuthGroup) {
       router.replace("/(auth)/login");
-    }
-
-    // 🟢 LOGUEADO → FORZAR HOME
-    if (user && inAuthGroup) {
+    } else if (user && inAuthGroup) {
       router.replace("/(tabs)");
     }
-  }, [user, loading]);
+  }, [user, loading, segments]);
 
   if (loading) {
     return (

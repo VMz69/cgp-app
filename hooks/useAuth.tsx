@@ -1,8 +1,11 @@
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import * as AuthService from "../lib/auth";
 import { auth } from "../lib/firebase";
-import { useGoogleAuth } from "../lib/googleAuth";
+
+WebBrowser.maybeCompleteAuthSession();
 
 type AuthContextType = {
   user: User | null;
@@ -10,9 +13,7 @@ type AuthContextType = {
   login: typeof AuthService.login;
   register: typeof AuthService.register;
   logout: typeof AuthService.logout;
-  loginWithGoogle: typeof AuthService.loginWithGoogle;
   signInWithGoogle: () => Promise<void>;
-  googleAuthLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -20,11 +21,19 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { promptAsync } = useGoogleAuth();
-  const [googleAuthLoading, setGoogleAuthLoading] = useState(false);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId:
+      "609110420341-60joj8652u8v3k5s3uv44tnlu06ros5q.apps.googleusercontent.com",
+
+    // 🔥 ESTO ES LA CLAVE
+    scopes: ["openid", "profile", "email"],
+    responseType: "id_token",
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("🔥 FIREBASE USER:", user);
       setUser(user);
       setLoading(false);
     });
@@ -32,21 +41,35 @@ export const AuthProvider = ({ children }: any) => {
     return unsubscribe;
   }, []);
 
-  const signInWithGoogle = async () => {
-    try {
-      setGoogleAuthLoading(true);
-      const result = await promptAsync();
-      if (result?.type === "success") {
-        const idToken = result.authentication?.idToken;
-        if (idToken) {
-          await AuthService.loginWithGoogle(idToken);
+  useEffect(() => {
+    const handleGoogle = async () => {
+      console.log("GOOGLE RESPONSE:", response);
+
+      if (response?.type === "success") {
+        const idToken = response.params?.id_token;
+
+        console.log("ID TOKEN:", idToken);
+
+        if (!idToken) {
+          console.log("❌ NO ID TOKEN");
+          return;
         }
+
+        await AuthService.loginWithGoogle(idToken);
       }
-    } catch (error: any) {
-      throw new Error(error.message);
-    } finally {
-      setGoogleAuthLoading(false);
+    };
+
+    handleGoogle();
+  }, [response]);
+
+  const signInWithGoogle = async () => {
+    if (!request) {
+      console.log("❌ REQUEST NOT READY");
+      return;
     }
+
+    console.log("🚀 OPEN GOOGLE");
+    await promptAsync();
   };
 
   return (
@@ -57,9 +80,7 @@ export const AuthProvider = ({ children }: any) => {
         login: AuthService.login,
         register: AuthService.register,
         logout: AuthService.logout,
-        loginWithGoogle: AuthService.loginWithGoogle,
         signInWithGoogle,
-        googleAuthLoading,
       }}
     >
       {children}
