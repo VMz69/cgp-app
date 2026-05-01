@@ -1,54 +1,340 @@
-import { Button, FlatList, Text, View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  EXPENSE_CATEGORIES,
+  getCategoryIcon,
+  getCategoryLabel,
+} from "../../constants/categories";
 import { useExpenses } from "../../hooks/useExpenses";
+import { setEditId } from "../../lib/editStore";
+import type { Expense } from "../../lib/expenses";
 
-// 🔹 helpers de categorías (los que ya creaste)
-import { getCategoryIcon, getCategoryLabel } from "../../constants/categories";
+type SortOption = "date" | "amount";
 
 export default function Expenses() {
-  const { expenses, loadExpenses } = useExpenses();
+  const { expenses, loadExpenses, deleteExpense } = useExpenses();
+  const router = useRouter();
 
-  /**
-   * 🔹 Render de cada item
-   */
-  const renderItem = ({ item }: any) => {
-    return (
-      <View
-        style={{
-          padding: 10,
-          borderBottomWidth: 1,
-          borderColor: "#ccc",
-        }}
-      >
-        {/* 🔥 Nombre + monto */}
-        <Text>
-          {getCategoryIcon(item.category)} {item.name} - ${item.amount}
-        </Text>
+  // Fernando — estado de filtros y ordenamiento
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterMonth, setFilterMonth] = useState("all");
+  const [sortBy, setSortBy] = useState<SortOption>("date");
 
-        {/* 🔹 Categoría */}
-        <Text style={{ color: "gray" }}>{getCategoryLabel(item.category)}</Text>
+  // Fernando — recargar la lista al recibir foco (al volver de add o edición)
+  useFocusEffect(
+    useCallback(() => {
+      loadExpenses();
+    }, []),
+  );
 
-        {/* 🔹 Fecha simple */}
-        <Text style={{ fontSize: 12, color: "gray" }}>
-          {new Date(item.date).toLocaleDateString()}
-        </Text>
-      </View>
+  // Fernando — meses disponibles derivados de los gastos cargados
+  const availableMonths = useMemo(() => {
+    const months = new Set<string>();
+    expenses.forEach((expense) => {
+      const date = new Date(expense.date);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      months.add(key);
+    });
+    return Array.from(months).sort().reverse();
+  }, [expenses]);
+
+  // Fernando — filtrado por categoría y mes, luego ordenamiento combinados
+  const filteredExpenses = useMemo(() => {
+    let result = [...expenses];
+
+    if (filterCategory !== "all") {
+      result = result.filter((e) => e.category === filterCategory);
+    }
+
+    if (filterMonth !== "all") {
+      result = result.filter((e) => {
+        const date = new Date(e.date);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        return key === filterMonth;
+      });
+    }
+
+    if (sortBy === "date") {
+      result.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      );
+    } else {
+      result.sort((a, b) => b.amount - a.amount);
+    }
+
+    return result;
+  }, [expenses, filterCategory, filterMonth, sortBy]);
+
+  // Fernando — confirmación y eliminación de un gasto con refresco de lista
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Eliminar gasto",
+      "¿Estás seguro de que deseas eliminar este gasto?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteExpense(id);
+              await loadExpenses();
+            } catch (error: any) {
+              Alert.alert("Error", error.message);
+            }
+          },
+        },
+      ],
     );
   };
 
-  return (
-    <View style={{ padding: 20 }}>
-      {/* 🔹 Botón recargar */}
-      <Button title="Recargar" onPress={loadExpenses} />
+  // Fernando — guardar el ID en editStore y navegar al formulario sin params en URL
+  const handleEdit = (id: string) => {
+    setEditId(id);
+    router.push("/(tabs)/add");
+  };
 
-      {/* 🔥 Lista de gastos */}
+  // Fernando — render de cada ítem con botones de editar y eliminar
+  const renderItem = ({ item }: { item: Expense }) => (
+    <View style={styles.item}>
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName}>
+          {getCategoryIcon(item.category)} {item.name}
+        </Text>
+        <Text style={styles.itemCategory}>
+          {getCategoryLabel(item.category)}
+        </Text>
+        <Text style={styles.itemDate}>
+          {new Date(item.date).toLocaleDateString("es-ES")}
+        </Text>
+      </View>
+
+      <View style={styles.itemRight}>
+        <Text style={styles.itemAmount}>${item.amount.toFixed(2)}</Text>
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => handleEdit(item.id)}
+          >
+            <Text style={styles.actionIcon}>✏️</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => handleDelete(item.id)}
+          >
+            <Text style={styles.actionIcon}>🗑️</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Mis Gastos</Text>
+
+      {/* Fernando — filtro por categoría con chips horizontales */}
+      <Text style={styles.filterLabel}>Categoría</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filterScroll}
+      >
+        <TouchableOpacity
+          style={[styles.chip, filterCategory === "all" && styles.chipActive]}
+          onPress={() => setFilterCategory("all")}
+        >
+          <Text
+            style={[
+              styles.chipText,
+              filterCategory === "all" && styles.chipTextActive,
+            ]}
+          >
+            Todas
+          </Text>
+        </TouchableOpacity>
+        {EXPENSE_CATEGORIES.map((cat) => (
+          <TouchableOpacity
+            key={cat.id}
+            style={[
+              styles.chip,
+              filterCategory === cat.id && styles.chipActive,
+            ]}
+            onPress={() => setFilterCategory(cat.id)}
+          >
+            <Text
+              style={[
+                styles.chipText,
+                filterCategory === cat.id && styles.chipTextActive,
+              ]}
+            >
+              {cat.icon} {cat.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Fernando — filtro por mes, visible solo si hay meses disponibles */}
+      {availableMonths.length > 0 && (
+        <>
+          <Text style={styles.filterLabel}>Mes</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filterScroll}
+          >
+            <TouchableOpacity
+              style={[styles.chip, filterMonth === "all" && styles.chipActive]}
+              onPress={() => setFilterMonth("all")}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  filterMonth === "all" && styles.chipTextActive,
+                ]}
+              >
+                Todos
+              </Text>
+            </TouchableOpacity>
+            {availableMonths.map((month) => {
+              const [year, m] = month.split("-");
+              const label = new Date(
+                parseInt(year),
+                parseInt(m) - 1,
+              ).toLocaleDateString("es-ES", {
+                month: "short",
+                year: "numeric",
+              });
+              return (
+                <TouchableOpacity
+                  key={month}
+                  style={[
+                    styles.chip,
+                    filterMonth === month && styles.chipActive,
+                  ]}
+                  onPress={() => setFilterMonth(month)}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      filterMonth === month && styles.chipTextActive,
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </>
+      )}
+
+      {/* Fernando — selector de ordenamiento */}
+      <Text style={styles.filterLabel}>Ordenar por</Text>
+      <View style={styles.sortRow}>
+        <TouchableOpacity
+          style={[styles.chip, sortBy === "date" && styles.chipActive]}
+          onPress={() => setSortBy("date")}
+        >
+          <Text
+            style={[
+              styles.chipText,
+              sortBy === "date" && styles.chipTextActive,
+            ]}
+          >
+            Más recientes
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.chip, sortBy === "amount" && styles.chipActive]}
+          onPress={() => setSortBy("amount")}
+        >
+          <Text
+            style={[
+              styles.chipText,
+              sortBy === "amount" && styles.chipTextActive,
+            ]}
+          >
+            Mayor monto
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Fernando — lista filtrada y ordenada con mensaje vacío amigable */}
       <FlatList
-        data={expenses}
+        data={filteredExpenses}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text style={{ marginTop: 20 }}>No hay gastos registrados</Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>🔍</Text>
+            <Text style={styles.emptyText}>
+              No hay gastos con los filtros seleccionados
+            </Text>
+          </View>
         }
+        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+  },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
+  filterLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#555",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  filterScroll: { marginBottom: 4 },
+  sortRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f5f5f5",
+    marginRight: 6,
+  },
+  chipActive: { backgroundColor: "#3498db", borderColor: "#3498db" },
+  chipText: { fontSize: 13, color: "#444" },
+  chipTextActive: { color: "#fff" },
+  item: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+  },
+  itemInfo: { flex: 1, paddingRight: 8 },
+  itemName: { fontSize: 15, fontWeight: "500", color: "#222" },
+  itemCategory: { fontSize: 12, color: "#777", marginTop: 2 },
+  itemDate: { fontSize: 11, color: "#aaa", marginTop: 2 },
+  itemRight: { alignItems: "flex-end" },
+  itemAmount: { fontSize: 16, fontWeight: "bold", color: "#e74c3c" },
+  actions: { flexDirection: "row", marginTop: 6, gap: 10 },
+  actionBtn: { padding: 4 },
+  actionIcon: { fontSize: 18 },
+  emptyContainer: { alignItems: "center", marginTop: 48 },
+  emptyIcon: { fontSize: 42, marginBottom: 10 },
+  emptyText: { color: "#999", fontSize: 14, textAlign: "center" },
+});

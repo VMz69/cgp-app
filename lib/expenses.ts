@@ -1,9 +1,28 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { auth, db } from "./firebase";
 
-/**
- * 🔹 Agregar gasto
- */
+// Fernando — tipo base para un gasto de la colección expenses
+export type Expense = {
+  id: string;
+  name: string;
+  amount: number;
+  category: string;
+  date: string;
+  userId: string;
+  createdAt: any;
+};
+
+// Fernando — agregar un nuevo gasto a Firestore
 export const addExpense = async (
   name: string,
   amount: number,
@@ -12,14 +31,8 @@ export const addExpense = async (
 ) => {
   try {
     const user = auth.currentUser;
-
-    // 🔴 Validación crítica backend
     if (!user) throw new Error("Usuario no autenticado");
-
-    // 🔴 Seguridad extra (aunque ya validaste en UI)
-    if (!name || amount <= 0) {
-      throw new Error("Datos inválidos");
-    }
+    if (!name || amount <= 0) throw new Error("Datos inválidos");
 
     await addDoc(collection(db, "expenses"), {
       name,
@@ -34,13 +47,10 @@ export const addExpense = async (
   }
 };
 
-/**
- * 🔹 Obtener gastos
- */
-export const getExpenses = async () => {
+// Fernando — obtener todos los gastos del usuario autenticado
+export const getExpenses = async (): Promise<Expense[]> => {
   try {
     const user = auth.currentUser;
-
     if (!user) return [];
 
     const q = query(
@@ -49,17 +59,49 @@ export const getExpenses = async () => {
     );
 
     const querySnapshot = await getDocs(q);
+    const expenses: Expense[] = [];
 
-    const expenses: any[] = [];
-
-    querySnapshot.forEach((doc) => {
-      expenses.push({
-        id: doc.id,
-        ...doc.data(),
-      });
+    querySnapshot.forEach((docSnap) => {
+      expenses.push({ id: docSnap.id, ...docSnap.data() } as Expense);
     });
 
     return expenses;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
+// Fernando — obtener un gasto por su ID de documento
+export const getExpenseById = async (id: string): Promise<Expense | null> => {
+  try {
+    const docRef = doc(db, "expenses", id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) return null;
+    return { id: docSnap.id, ...docSnap.data() } as Expense;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
+// Fernando — actualizar campos de un gasto existente en Firestore
+export const updateExpense = async (
+  id: string,
+  data: Partial<Pick<Expense, "name" | "amount" | "category" | "date">>,
+) => {
+  try {
+    const docRef = doc(db, "expenses", id);
+    await updateDoc(docRef, { ...data });
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
+// Fernando — eliminar un gasto de Firestore por su ID
+export const deleteExpense = async (id: string) => {
+  try {
+    const docRef = doc(db, "expenses", id);
+    await deleteDoc(docRef);
   } catch (error: any) {
     throw new Error(error.message);
   }
