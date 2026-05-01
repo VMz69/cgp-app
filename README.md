@@ -1,50 +1,164 @@
-# Welcome to your Expo app 👋
+# 📱 CGP App - Control de Gastos Personales
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil desarrollada con React Native + Expo + Firebase, que permite a los usuarios autenticarse (Email / Google) y gestionar sus gastos personales con almacenamiento en Firestore.
 
-## Get started
+## 🎯 Objetivo del proyecto
 
-1. Install dependencies
+Desarrollar una app móvil funcional que permita:
 
-   ```bash
-   npm install
-   ```
+- Autenticación de usuarios (Email / Google)
+- Registro de gastos personales
+- Clasificación por categoría
+- Visualización de historial de gastos
+- Cálculo de total mensual
+- Persistencia en Firebase Firestore
 
-2. Start the app
+## 🚀 Tecnologías utilizadas
 
-   ```bash
-   npx expo start
-   ```
+- React Native (Expo)
+- Expo Router
+- Firebase Authentication
+- Firebase Firestore
+- Expo Auth Session (Google Login)
+- TypeScript
 
-In the output, you'll find options to open the app in a
+## 🔐 Autenticación
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+La app implementa:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Email & Password (Firebase Auth)
+- Google Login (OAuth 2.0 con Expo Auth Session)
 
-## Get a fresh project
+## ⚠️ Nota técnica importante
 
-When you're ready, run:
+En Expo Go, el login con Google funciona mediante redirección web (exp://)
+En producción se requiere build (EAS / APK / AAB) para flujo nativo completo
+
+## 📦 Instalación y ejecución
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Opciones:
 
-## Learn more
+- `a` → Android
+- `w` → Web (mejor soporte OAuth actual)
+- `npx expo start -c` → limpiar cache
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📁 Estructura del proyecto
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+app/
+├── (auth)/        # Login / Register
+├── (tabs)/        # App principal (home, expenses, add)
+├── _layout.tsx    # Router principal
 
-## Join the community
+components/         # UI reutilizable
+hooks/              # lógica (auth, expenses)
+lib/                # firebase + auth logic
+constants/          # categorías de gastos
+```
 
-Join our community of developers creating universal apps.
+## 💰 Funcionalidades
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 🔑 Autenticación
+
+- Login con correo y contraseña
+- Login con Google (OAuth Firebase + Expo)
+
+### 💸 Gestión de gastos
+
+- Crear gasto
+- Guardar en Firestore por usuario
+- Ver historial
+- Clasificación por categoría
+- Fecha de registro
+
+### 📊 Resumen
+
+- Total mensual automático
+- Filtrado por usuario autenticado
+
+## 👥 Integrantes y responsabilidades
+
+### 👨‍💻 Victor Velasco (Coordinador)
+
+- Arquitectura del proyecto
+- Integración Firebase (Auth + Firestore)
+- Implementación Expo Router
+- Lógica de autenticación (Email + Google)
+- Hooks y estado global
+
+### 🎥 Milton Ayala
+
+Responsable de documentación audiovisual
+
+- Grabación del video demo (máx. 15 min)
+- Explicación del flujo:
+  - Login
+  - Registro de gastos
+  - Visualización de datos
+- Edición y entrega final del video
+
+### 📄 José Aquino
+
+Documentación técnica (PDF - APA 7ma edición)
+
+- Portada e índice
+- Investigación de Firebase Auth
+- Explicación de implementación
+- Capturas del sistema
+- Conclusiones
+- Formato APA obligatorio
+
+### 🎨 William Montano
+
+Diseño UI/UX de la aplicación
+
+- Mejorar interfaz visual
+- Consistencia de componentes
+- UX del formulario de gastos
+- Pantallas más limpias y modernas
+- Optimización de experiencia de usuario
+
+### ⚙️ Fernando Gomez
+
+Mejoras funcionales de la app
+
+- Validaciones de formularios
+- Manejo de errores Firebase
+- Mejoras en flujo de autenticación
+- Optimización de Firestore queries
+- Mejoras pequeñas de performance
+
+## ⚠️ Notas importantes del proyecto
+
+- Expo Go limita autenticación Google en modo nativo
+- OAuth en desarrollo puede usar redirección exp://
+
+En producción se recomienda:
+
+- EAS Build
+- Android APK o App Bundle
+
+Firebase debe tener habilitado:
+
+- Google Auth Provider
+- Email/Password Provider
+- Firestore Database
+
+## 📌 Estado del proyecto
+
+- ✔ Autenticación funcional
+- ✔ Firebase conectado
+- ✔ Gastos almacenados en Firestore
+- ✔ Router por roles (auth / app)
+- ⚠ Google Auth depende del entorno (Expo Go vs Web vs Build)
+
+## 📄 Entregables
+
+- Código fuente en GitHub
+- Documento PDF (APA 7)
+- Video demostrativo (≤ 15 min)

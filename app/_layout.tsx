@@ -1,9 +1,28 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { AuthProvider, useAuth } from "../hooks/useAuth";
 
 function RootNavigation() {
   const { user, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    // 🔴 NO LOGUEADO → FORZAR LOGIN
+    if (!user && !inAuthGroup) {
+      router.replace("/(auth)/login");
+    }
+
+    // 🟢 LOGUEADO → FORZAR HOME
+    if (user && inAuthGroup) {
+      router.replace("/(tabs)");
+    }
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -13,11 +32,7 @@ function RootNavigation() {
     );
   }
 
-  return (
-    <Stack key={user ? "user" : "guest"} screenOptions={{ headerShown: false }}>
-      {!user ? <Stack.Screen name="(auth)" /> : <Stack.Screen name="(tabs)" />}
-    </Stack>
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 export default function RootLayout() {
