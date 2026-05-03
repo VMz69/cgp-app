@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -45,7 +46,7 @@ export default function AddExpense() {
         setCategory("");
         setDate(new Date().toISOString().split("T")[0]);
       }
-    }, []),
+    }, [])
   );
 
   // Fernando — precargar los datos del gasto cuando hay un ID de edición
@@ -77,17 +78,21 @@ export default function AddExpense() {
     if (!name.trim()) {
       return Alert.alert(
         "Campo requerido",
-        "El nombre del gasto es obligatorio",
+        "El nombre del gasto es obligatorio"
       );
     }
 
     if (!category) {
-      return Alert.alert("Campo requerido", "Debes seleccionar una categoría");
+      return Alert.alert(
+        "Campo requerido",
+        "Debes seleccionar una categoría"
+      );
     }
 
     if (!date.trim()) {
       return Alert.alert("Campo requerido", "La fecha es obligatoria");
     }
+
     // Fernando — validar fecha creando Date local (evita desfase UTC)
     const [y, m, d] = date.split("-").map(Number);
     const parsedDate = new Date(y, m - 1, d);
@@ -98,21 +103,23 @@ export default function AddExpense() {
     ) {
       return Alert.alert(
         "Fecha inválida",
-        "Ingresa la fecha en formato AAAA-MM-DD (ejemplo: 2025-05-20)",
+        "Ingresa la fecha en formato AAAA-MM-DD (ejemplo: 2025-05-20)"
       );
     }
 
     if (!amount.trim()) {
       return Alert.alert("Campo requerido", "El monto es obligatorio");
     }
+
     const numericAmount = Number(amount);
     if (isNaN(numericAmount)) {
       return Alert.alert("Monto inválido", "El monto debe ser un número");
     }
+
     if (numericAmount <= 0) {
       return Alert.alert(
         "Monto inválido",
-        "El monto debe ser un número positivo mayor a $0.00",
+        "El monto debe ser un número positivo mayor a $0.00"
       );
     }
 
@@ -123,7 +130,7 @@ export default function AddExpense() {
           name: name.trim(),
           amount: numericAmount,
           category,
-          date: date,
+          date,
         });
         Alert.alert("¡Listo!", "Gasto actualizado correctamente");
         router.replace("/(tabs)/expenses");
@@ -143,17 +150,29 @@ export default function AddExpense() {
   if (loadingData) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#3498db" />
-        <Text style={styles.loadingText}>Cargando gasto...</Text>
+        <ActivityIndicator size="large" />
+        <Text style={styles.loadingText}>Cargando gasto…</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.title}>
-        {isEditing ? "Editar Gasto" : "Nuevo Gasto"}
-      </Text>
+    <ScrollView
+      style={styles.container}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={require("../../assets/logo.png")}
+          resizeMode="contain"
+          style={styles.logo}
+        />
+        <Text style={styles.title}>
+          {isEditing ? "Editar gasto" : "Nuevo gasto"}
+        </Text>
+      </View>
 
       {/* Fernando — campo nombre del gasto */}
       <Text style={styles.label}>Nombre *</Text>
@@ -161,8 +180,8 @@ export default function AddExpense() {
         style={styles.input}
         value={name}
         onChangeText={setName}
-        placeholder="Ej: Almuerzo, Uber, Netflix..."
-        placeholderTextColor="#aaa"
+        placeholder="Ej: Almuerzo, Uber, Netflix…"
+        placeholderTextColor="#9CA3AF"
       />
 
       {/* Fernando — selector de categoría con placeholder inicial no seleccionable */}
@@ -175,10 +194,10 @@ export default function AddExpense() {
           }}
         >
           <Picker.Item
-            label="Seleccione una categoría..."
+            label="Seleccione una categoría…"
             value=""
             enabled={false}
-            color="#aaa"
+            color="#9CA3AF"
           />
           {EXPENSE_CATEGORIES.map((cat) => (
             <Picker.Item
@@ -191,14 +210,14 @@ export default function AddExpense() {
       </View>
 
       {/* Fernando — campo fecha en formato AAAA-MM-DD */}
-      <Text style={styles.label}>Fecha * (AAAA-MM-DD)</Text>
+      <Text style={styles.label}>Fecha *</Text>
       <TextInput
         style={styles.input}
         value={date}
         onChangeText={setDate}
-        placeholder="2025-05-20"
-        placeholderTextColor="#aaa"
         keyboardType="numbers-and-punctuation"
+        placeholder="AAAA-MM-DD"
+        placeholderTextColor="#9CA3AF"
       />
 
       {/* Fernando — campo monto numérico positivo */}
@@ -209,7 +228,7 @@ export default function AddExpense() {
         onChangeText={setAmount}
         keyboardType="decimal-pad"
         placeholder="0.00"
-        placeholderTextColor="#aaa"
+        placeholderTextColor="#9CA3AF"
       />
 
       {/* Fernando — botón guardar con indicador de carga mientras se procesa */}
@@ -222,62 +241,83 @@ export default function AddExpense() {
           <ActivityIndicator color="#fff" />
         ) : (
           <Text style={styles.saveButtonText}>
-            {isEditing ? "Actualizar Gasto" : "Guardar Gasto"}
+            {isEditing ? "Actualizar gasto" : "Guardar gasto"}
           </Text>
         )}
       </TouchableOpacity>
-
-      {isEditing && (
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={() => router.replace("/(tabs)/expenses")}
-        >
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
-        </TouchableOpacity>
-      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: 12, color: "#666", fontSize: 14 },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20, marginTop: 8 },
-  label: { fontSize: 14, fontWeight: "600", color: "#333", marginBottom: 4 },
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+    padding: 24,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 8,
+    opacity: 0.9,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 6,
+  },
   input: {
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 15,
-    marginBottom: 14,
-    color: "#333",
+    marginBottom: 16,
+    color: "#111827",
   },
   pickerContainer: {
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    marginBottom: 14,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    marginBottom: 16,
     overflow: "hidden",
   },
   saveButton: {
-    backgroundColor: "#3498db",
-    padding: 14,
-    borderRadius: 8,
+    backgroundColor: "#2563EB",
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
     marginTop: 8,
   },
-  saveButtonDisabled: { backgroundColor: "#a0c4e8" },
-  saveButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  cancelButton: {
-    padding: 14,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
+  saveButtonDisabled: {
+    backgroundColor: "#93C5FD",
   },
-  cancelButtonText: { color: "#666", fontSize: 15 },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    color: "#6B7280",
+    fontSize: 14,
+  },
 });

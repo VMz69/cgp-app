@@ -1,6 +1,12 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { useExpenses } from "../../hooks/useExpenses";
 
@@ -9,11 +15,10 @@ export default function Home() {
   const { logout } = useAuth();
   const router = useRouter();
 
-  // Fernando — recargar los totales al recibir foco (tras agregar o editar un gasto)
   useFocusEffect(
     useCallback(() => {
       loadExpenses();
-    }, []),
+    }, [])
   );
 
   const handleLogout = async () => {
@@ -27,45 +32,97 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Resumen</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={require("../../assets/logo.png")}
+          resizeMode="contain"
+          style={styles.smallLogo}
+        />
+        <Text style={styles.title}>Resumen</Text>
+      </View>
 
-      {/* Fernando — card total del mes actual */}
-      <View style={[styles.card, styles.cardGreen]}>
+      {/* Total del mes */}
+      <View style={styles.card}>
         <Text style={styles.cardLabel}>Total del mes</Text>
-        <Text style={styles.cardAmountLarge}>${monthlyTotal.toFixed(2)}</Text>
+        <Text style={styles.amountLarge}>
+          ${monthlyTotal.toFixed(2)}
+        </Text>
       </View>
 
-      {/* Fernando — card total general de todos los gastos */}
-      <View style={[styles.card, styles.cardBlue]}>
+      {/* Total general */}
+      <View style={styles.card}>
         <Text style={styles.cardLabel}>Total general</Text>
-        <Text style={styles.cardAmountMedium}>${total.toFixed(2)}</Text>
+        <Text style={styles.amountMedium}>
+          ${total.toFixed(2)}
+        </Text>
       </View>
 
-      <View style={styles.logoutContainer}>
-        <Button title="Cerrar sesión" onPress={handleLogout} />
-      </View>
+      {/* Logout */}
+      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Cerrar sesión</Text>
+      </Pressable>
     </View>
   );
 }
 
+/* ---------------- STYLES ---------------- */
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  card: { padding: 20, borderRadius: 10, marginBottom: 15 },
-  cardGreen: { backgroundColor: "#4CAF50" },
-  cardBlue: { backgroundColor: "#2196F3" },
-  cardLabel: { color: "white", fontSize: 16 },
-  cardAmountLarge: {
-    color: "white",
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+    padding: 24,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  smallLogo: {
+    width: 100,
+    height: 100,
+    marginBottom: 8,
+  },
+  title: {
     fontSize: 28,
-    fontWeight: "bold",
-    marginTop: 5,
+    fontWeight: "600",
+    color: "#111827",
   },
-  cardAmountMedium: {
-    color: "white",
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 14,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  cardLabel: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 8,
+  },
+  amountLarge: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  amountMedium: {
     fontSize: 24,
-    fontWeight: "bold",
-    marginTop: 5,
+    fontWeight: "600",
+    color: "#111827",
   },
-  logoutContainer: { marginTop: "auto" as any },
+  logoutButton: {
+    marginTop: "auto",
+    backgroundColor: "#EF4444",
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  logoutText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
+  },
 });

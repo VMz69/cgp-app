@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -33,7 +34,7 @@ export default function Expenses() {
   useFocusEffect(
     useCallback(() => {
       loadExpenses();
-    }, []),
+    }, [])
   );
 
   // Fernando — meses disponibles derivados de los gastos, usando partes de fecha locales
@@ -63,7 +64,8 @@ export default function Expenses() {
 
     if (sortBy === "date") {
       result.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        (a, b) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
       );
     } else {
       result.sort((a, b) => b.amount - a.amount);
@@ -91,7 +93,7 @@ export default function Expenses() {
             }
           },
         },
-      ],
+      ]
     );
   };
 
@@ -103,8 +105,8 @@ export default function Expenses() {
 
   // Fernando — render de cada ítem con botones de editar y eliminar
   const renderItem = ({ item }: { item: Expense }) => (
-    <View style={styles.item}>
-      <View style={styles.itemInfo}>
+    <View style={styles.card}>
+      <View style={styles.cardLeft}>
         <Text style={styles.itemName}>
           {getCategoryIcon(item.category)} {item.name}
         </Text>
@@ -113,25 +115,24 @@ export default function Expenses() {
         </Text>
         <Text style={styles.itemDate}>
           {(() => {
-            const [y, m, d] = item.date.split("T")[0].split("-").map(Number);
+            const [y, m, d] = item.date
+              .split("T")[0]
+              .split("-")
+              .map(Number);
             return new Date(y, m - 1, d).toLocaleDateString("es-ES");
           })()}
         </Text>
       </View>
 
-      <View style={styles.itemRight}>
-        <Text style={styles.itemAmount}>${item.amount.toFixed(2)}</Text>
+      <View style={styles.cardRight}>
+        <Text style={styles.itemAmount}>
+          ${item.amount.toFixed(2)}
+        </Text>
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => handleEdit(item.id)}
-          >
+          <TouchableOpacity onPress={() => handleEdit(item.id)}>
             <Text style={styles.actionIcon}>✏️</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => handleDelete(item.id)}
-          >
+          <TouchableOpacity onPress={() => handleDelete(item.id)}>
             <Text style={styles.actionIcon}>🗑️</Text>
           </TouchableOpacity>
         </View>
@@ -141,15 +142,22 @@ export default function Expenses() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mis Gastos</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Image
+          source={require("../../assets/logo.png")}
+          resizeMode="contain"
+          style={styles.logo}
+        />
+        <Text style={styles.title}>Mis gastos</Text>
+      </View>
 
       {/* Filtro por categoría */}
       <Text style={styles.filterLabel}>Categoría</Text>
-      <View style={styles.pickerWrapper}>
+      <View style={styles.pickerContainer}>
         <Picker
           selectedValue={filterCategory}
           onValueChange={(value) => setFilterCategory(value)}
-          style={styles.picker}
         >
           <Picker.Item label="Todas las categorías" value="all" />
           {EXPENSE_CATEGORIES.map((cat) => (
@@ -164,23 +172,24 @@ export default function Expenses() {
 
       {/* Filtro por mes */}
       <Text style={styles.filterLabel}>Mes</Text>
-      <View style={styles.pickerWrapper}>
+      <View style={styles.pickerContainer}>
         <Picker
           selectedValue={filterMonth}
           onValueChange={(value) => setFilterMonth(value)}
-          style={styles.picker}
         >
           <Picker.Item label="Todos los meses" value="all" />
           {availableMonths.map((month) => {
             const [year, m] = month.split("-");
             const label = new Date(
               parseInt(year),
-              parseInt(m) - 1,
+              parseInt(m) - 1
             ).toLocaleDateString("es-ES", {
               month: "long",
               year: "numeric",
             });
-            return <Picker.Item key={month} label={label} value={month} />;
+            return (
+              <Picker.Item key={month} label={label} value={month} />
+            );
           })}
         </Picker>
       </View>
@@ -189,7 +198,10 @@ export default function Expenses() {
       <Text style={styles.filterLabel}>Ordenar por</Text>
       <View style={styles.sortRow}>
         <TouchableOpacity
-          style={[styles.chip, sortBy === "date" && styles.chipActive]}
+          style={[
+            styles.chip,
+            sortBy === "date" && styles.chipActive,
+          ]}
           onPress={() => setSortBy("date")}
         >
           <Text
@@ -201,8 +213,12 @@ export default function Expenses() {
             Más recientes
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-          style={[styles.chip, sortBy === "amount" && styles.chipActive]}
+          style={[
+            styles.chip,
+            sortBy === "amount" && styles.chipActive,
+          ]}
           onPress={() => setSortBy("amount")}
         >
           <Text
@@ -216,7 +232,7 @@ export default function Expenses() {
         </TouchableOpacity>
       </View>
 
-      {/* Fernando — lista filtrada y ordenada con mensaje cuando este vacía */}
+      {/* Fernando — lista filtrada y ordenada con mensaje cuando está vacía */}
       <FlatList
         data={filteredExpenses}
         keyExtractor={(item) => item.id}
@@ -229,7 +245,8 @@ export default function Expenses() {
             </Text>
           </View>
         }
-        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 24 }}
       />
     </View>
   );
@@ -238,58 +255,121 @@ export default function Expenses() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 16,
-    paddingHorizontal: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB",
+    padding: 24,
   },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
-  filterLabel: {
-    fontSize: 12,
+  header: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 6,
+    opacity: 0.9,
+  },
+  title: {
+    fontSize: 26,
     fontWeight: "600",
-    color: "#555",
-    marginTop: 8,
-    marginBottom: 4,
+    color: "#111827",
   },
-  pickerWrapper: {
+  filterLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  pickerContainer: {
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    marginBottom: 10,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    marginBottom: 12,
     overflow: "hidden",
-    backgroundColor: "#f9f9f9",
   },
-  picker: { height: 48 },
-  sortRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  sortRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 12,
+  },
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#f5f5f5",
-    marginRight: 6,
+    backgroundColor: "#E5E7EB",
   },
-  chipActive: { backgroundColor: "#3498db", borderColor: "#3498db" },
-  chipText: { fontSize: 13, color: "#444" },
-  chipTextActive: { color: "#fff" },
-  item: {
+  chipActive: {
+    backgroundColor: "#2563EB",
+  },
+  chipText: {
+    fontSize: 13,
+    color: "#374151",
+    fontWeight: "500",
+  },
+  chipTextActive: {
+    color: "#FFFFFF",
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
+
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
-  itemInfo: { flex: 1, paddingRight: 8 },
-  itemName: { fontSize: 15, fontWeight: "500", color: "#222" },
-  itemCategory: { fontSize: 12, color: "#777", marginTop: 2 },
-  itemDate: { fontSize: 11, color: "#aaa", marginTop: 2 },
-  itemRight: { alignItems: "flex-end" },
-  itemAmount: { fontSize: 16, fontWeight: "bold", color: "#e74c3c" },
-  actions: { flexDirection: "row", marginTop: 6, gap: 10 },
-  actionBtn: { padding: 4 },
-  actionIcon: { fontSize: 18 },
-  emptyContainer: { alignItems: "center", marginTop: 48 },
-  emptyIcon: { fontSize: 42, marginBottom: 10 },
-  emptyText: { color: "#999", fontSize: 14, textAlign: "center" },
+  cardLeft: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  cardRight: {
+    alignItems: "flex-end",
+  },
+  itemName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  itemCategory: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  itemDate: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    marginTop: 2,
+  },
+  itemAmount: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#EF4444",
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 6,
+  },
+  actionIcon: {
+    fontSize: 18,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    marginTop: 48,
+  },
+  emptyIcon: {
+    fontSize: 42,
+    marginBottom: 8,
+  },
+  emptyText: {
+    color: "#6B7280",
+    fontSize: 14,
+    textAlign: "center",
+  },
 });
