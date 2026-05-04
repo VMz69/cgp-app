@@ -34,7 +34,7 @@ export default function Expenses() {
   useFocusEffect(
     useCallback(() => {
       loadExpenses();
-    }, [])
+    }, []),
   );
 
   // Fernando — meses disponibles derivados de los gastos, usando partes de fecha locales
@@ -64,8 +64,7 @@ export default function Expenses() {
 
     if (sortBy === "date") {
       result.sort(
-        (a, b) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
     } else {
       result.sort((a, b) => b.amount - a.amount);
@@ -93,7 +92,7 @@ export default function Expenses() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -115,19 +114,14 @@ export default function Expenses() {
         </Text>
         <Text style={styles.itemDate}>
           {(() => {
-            const [y, m, d] = item.date
-              .split("T")[0]
-              .split("-")
-              .map(Number);
+            const [y, m, d] = item.date.split("T")[0].split("-").map(Number);
             return new Date(y, m - 1, d).toLocaleDateString("es-ES");
           })()}
         </Text>
       </View>
 
       <View style={styles.cardRight}>
-        <Text style={styles.itemAmount}>
-          ${item.amount.toFixed(2)}
-        </Text>
+        <Text style={styles.itemAmount}>${item.amount.toFixed(2)}</Text>
         <View style={styles.actions}>
           <TouchableOpacity onPress={() => handleEdit(item.id)}>
             <Text style={styles.actionIcon}>✏️</Text>
@@ -145,7 +139,7 @@ export default function Expenses() {
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={require("../../assets/logo.png")}
+          source={require("../../assets/images/logo.png")}
           resizeMode="contain"
           style={styles.logo}
         />
@@ -182,14 +176,12 @@ export default function Expenses() {
             const [year, m] = month.split("-");
             const label = new Date(
               parseInt(year),
-              parseInt(m) - 1
+              parseInt(m) - 1,
             ).toLocaleDateString("es-ES", {
               month: "long",
               year: "numeric",
             });
-            return (
-              <Picker.Item key={month} label={label} value={month} />
-            );
+            return <Picker.Item key={month} label={label} value={month} />;
           })}
         </Picker>
       </View>
@@ -198,10 +190,7 @@ export default function Expenses() {
       <Text style={styles.filterLabel}>Ordenar por</Text>
       <View style={styles.sortRow}>
         <TouchableOpacity
-          style={[
-            styles.chip,
-            sortBy === "date" && styles.chipActive,
-          ]}
+          style={[styles.chip, sortBy === "date" && styles.chipActive]}
           onPress={() => setSortBy("date")}
         >
           <Text
@@ -215,10 +204,7 @@ export default function Expenses() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.chip,
-            sortBy === "amount" && styles.chipActive,
-          ]}
+          style={[styles.chip, sortBy === "amount" && styles.chipActive]}
           onPress={() => setSortBy("amount")}
         >
           <Text

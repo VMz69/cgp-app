@@ -46,7 +46,7 @@ export default function AddExpense() {
         setCategory("");
         setDate(new Date().toISOString().split("T")[0]);
       }
-    }, [])
+    }, []),
   );
 
   // Fernando — precargar los datos del gasto cuando hay un ID de edición
@@ -78,15 +78,12 @@ export default function AddExpense() {
     if (!name.trim()) {
       return Alert.alert(
         "Campo requerido",
-        "El nombre del gasto es obligatorio"
+        "El nombre del gasto es obligatorio",
       );
     }
 
     if (!category) {
-      return Alert.alert(
-        "Campo requerido",
-        "Debes seleccionar una categoría"
-      );
+      return Alert.alert("Campo requerido", "Debes seleccionar una categoría");
     }
 
     if (!date.trim()) {
@@ -103,7 +100,7 @@ export default function AddExpense() {
     ) {
       return Alert.alert(
         "Fecha inválida",
-        "Ingresa la fecha en formato AAAA-MM-DD (ejemplo: 2025-05-20)"
+        "Ingresa la fecha en formato AAAA-MM-DD (ejemplo: 2025-05-20)",
       );
     }
 
@@ -119,7 +116,7 @@ export default function AddExpense() {
     if (numericAmount <= 0) {
       return Alert.alert(
         "Monto inválido",
-        "El monto debe ser un número positivo mayor a $0.00"
+        "El monto debe ser un número positivo mayor a $0.00",
       );
     }
 
@@ -165,7 +162,7 @@ export default function AddExpense() {
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={require("../../assets/logo.png")}
+          source={require("../../assets/images/logo.png")}
           resizeMode="contain"
           style={styles.logo}
         />

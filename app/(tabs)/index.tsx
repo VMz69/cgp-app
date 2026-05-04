@@ -1,12 +1,6 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { useExpenses } from "../../hooks/useExpenses";
 
@@ -18,7 +12,7 @@ export default function Home() {
   useFocusEffect(
     useCallback(() => {
       loadExpenses();
-    }, [])
+    }, []),
   );
 
   const handleLogout = async () => {
@@ -35,7 +29,7 @@ export default function Home() {
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={require("../../assets/logo.png")}
+          source={require("../../assets/images/logo.png")}
           resizeMode="contain"
           style={styles.smallLogo}
         />
@@ -45,17 +39,13 @@ export default function Home() {
       {/* Total del mes */}
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Total del mes</Text>
-        <Text style={styles.amountLarge}>
-          ${monthlyTotal.toFixed(2)}
-        </Text>
+        <Text style={styles.amountLarge}>${monthlyTotal.toFixed(2)}</Text>
       </View>
 
       {/* Total general */}
       <View style={styles.card}>
         <Text style={styles.cardLabel}>Total general</Text>
-        <Text style={styles.amountMedium}>
-          ${total.toFixed(2)}
-        </Text>
+        <Text style={styles.amountMedium}>${total.toFixed(2)}</Text>
       </View>
 
       {/* Logout */}
