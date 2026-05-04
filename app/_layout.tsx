@@ -1,10 +1,10 @@
-import { Stack } from "expo-router";
+import { Slot } from "expo-router";
 import { AuthProvider } from "../hooks/useAuth";
 
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Slot />
     </AuthProvider>
   );
 }
