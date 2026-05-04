@@ -5,11 +5,15 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { EXPENSE_CATEGORIES } from "../../constants/categories";
@@ -154,103 +158,118 @@ export default function AddExpense() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
+    <KeyboardAvoidingView
+      style={styles.keyboardContainer}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <Image
-          source={require("../../assets/images/logo.png")}
-          resizeMode="contain"
-          style={styles.logo}
-        />
-        <Text style={styles.title}>
-          {isEditing ? "Editar gasto" : "Nuevo gasto"}
-        </Text>
-      </View>
-
-      {/* Fernando — campo nombre del gasto */}
-      <Text style={styles.label}>Nombre *</Text>
-      <TextInput
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="Ej: Almuerzo, Uber, Netflix…"
-        placeholderTextColor="#9CA3AF"
-      />
-
-      {/* Fernando — selector de categoría con placeholder inicial no seleccionable */}
-      <Text style={styles.label}>Categoría *</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={category}
-          onValueChange={(value: string) => {
-            if (value !== "") setCategory(value);
-          }}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Picker.Item
-            label="Seleccione una categoría…"
-            value=""
-            enabled={false}
-            color="#9CA3AF"
-          />
-          {EXPENSE_CATEGORIES.map((cat) => (
-            <Picker.Item
-              key={cat.id}
-              label={`${cat.icon} ${cat.label}`}
-              value={cat.id}
+          {/* Header */}
+          <View style={styles.header}>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              resizeMode="contain"
+              style={styles.logo}
             />
-          ))}
-        </Picker>
-      </View>
+            <Text style={styles.title}>
+              {isEditing ? "Editar gasto" : "Nuevo gasto"}
+            </Text>
+          </View>
 
-      {/* Fernando — campo fecha en formato AAAA-MM-DD */}
-      <Text style={styles.label}>Fecha *</Text>
-      <TextInput
-        style={styles.input}
-        value={date}
-        onChangeText={setDate}
-        keyboardType="numbers-and-punctuation"
-        placeholder="AAAA-MM-DD"
-        placeholderTextColor="#9CA3AF"
-      />
+          {/* Fernando — campo nombre del gasto */}
+          <Text style={styles.label}>Nombre *</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="Ej: Almuerzo, Uber, Netflix…"
+            placeholderTextColor="#9CA3AF"
+          />
 
-      {/* Fernando — campo monto numérico positivo */}
-      <Text style={styles.label}>Monto *</Text>
-      <TextInput
-        style={styles.input}
-        value={amount}
-        onChangeText={setAmount}
-        keyboardType="decimal-pad"
-        placeholder="0.00"
-        placeholderTextColor="#9CA3AF"
-      />
+          {/* Fernando — selector de categoría con placeholder inicial no seleccionable */}
+          <Text style={styles.label}>Categoría *</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={category}
+              onValueChange={(value: string) => {
+                if (value !== "") setCategory(value);
+              }}
+            >
+              <Picker.Item
+                label="Seleccione una categoría…"
+                value=""
+                enabled={false}
+                color="#9CA3AF"
+              />
+              {EXPENSE_CATEGORIES.map((cat) => (
+                <Picker.Item
+                  key={cat.id}
+                  label={`${cat.icon} ${cat.label}`}
+                  value={cat.id}
+                />
+              ))}
+            </Picker>
+          </View>
 
-      {/* Fernando — botón guardar con indicador de carga mientras se procesa */}
-      <TouchableOpacity
-        style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-        onPress={handleSave}
-        disabled={saving}
-      >
-        {saving ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.saveButtonText}>
-            {isEditing ? "Actualizar gasto" : "Guardar gasto"}
-          </Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+          {/* Fernando — campo fecha en formato AAAA-MM-DD */}
+          <Text style={styles.label}>Fecha *</Text>
+          <TextInput
+            style={styles.input}
+            value={date}
+            onChangeText={setDate}
+            keyboardType="numbers-and-punctuation"
+            placeholder="AAAA-MM-DD"
+            placeholderTextColor="#9CA3AF"
+          />
+
+          {/* Fernando — campo monto numérico positivo */}
+          <Text style={styles.label}>Monto *</Text>
+          <TextInput
+            style={styles.input}
+            value={amount}
+            onChangeText={setAmount}
+            keyboardType="decimal-pad"
+            placeholder="0.00"
+            placeholderTextColor="#9CA3AF"
+          />
+
+          {/* Fernando — botón guardar con indicador de carga mientras se procesa */}
+          <TouchableOpacity
+            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            {saving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.saveButtonText}>
+                {isEditing ? "Actualizar gasto" : "Guardar gasto"}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: "#F9FAFB",
     padding: 24,
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
   header: {
     alignItems: "center",

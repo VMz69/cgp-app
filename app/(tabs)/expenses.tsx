@@ -134,9 +134,8 @@ export default function Expenses() {
     </View>
   );
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
+  const renderHeader = () => (
+    <>
       <View style={styles.header}>
         <Image
           source={require("../../assets/images/logo.png")}
@@ -146,7 +145,6 @@ export default function Expenses() {
         <Text style={styles.title}>Mis gastos</Text>
       </View>
 
-      {/* Filtro por categoría */}
       <Text style={styles.filterLabel}>Categoría</Text>
       <View style={styles.pickerContainer}>
         <Picker
@@ -164,7 +162,6 @@ export default function Expenses() {
         </Picker>
       </View>
 
-      {/* Filtro por mes */}
       <Text style={styles.filterLabel}>Mes</Text>
       <View style={styles.pickerContainer}>
         <Picker
@@ -186,7 +183,6 @@ export default function Expenses() {
         </Picker>
       </View>
 
-      {/* Fernando — selector de ordenamiento */}
       <Text style={styles.filterLabel}>Ordenar por</Text>
       <View style={styles.sortRow}>
         <TouchableOpacity
@@ -217,12 +213,16 @@ export default function Expenses() {
           </Text>
         </TouchableOpacity>
       </View>
+    </>
+  );
 
-      {/* Fernando — lista filtrada y ordenada con mensaje cuando está vacía */}
+  return (
+    <View style={styles.container}>
       <FlatList
         data={filteredExpenses}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>🔍</Text>
