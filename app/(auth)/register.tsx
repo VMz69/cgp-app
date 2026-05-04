@@ -1,13 +1,6 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Image,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Image, Pressable, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function RegisterScreen() {
@@ -34,7 +27,6 @@ export default function RegisterScreen() {
       await register(email, password);
       await login(email, password);
 
-      
       router.replace("/(tabs)");
     } catch (error: any) {
       Alert.alert("Error", error.message);
@@ -52,7 +44,7 @@ export default function RegisterScreen() {
     >
       {/* Logo */}
       <Image
-        source={require("../../assets/logo.png")}
+        source={require("../../assets/images/logo.png")}
         style={{
           width: 150,
           height: 150,

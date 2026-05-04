@@ -1,13 +1,6 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Image,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Image, Pressable, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function LoginScreen() {
@@ -29,7 +22,6 @@ export default function LoginScreen() {
 
       await login(email, password);
 
-     
       router.replace("/(tabs)");
     } catch (error: any) {
       Alert.alert("Error", error.message);
@@ -47,9 +39,9 @@ export default function LoginScreen() {
     >
       {/* Logo perron */}
       <Image
-        source={require("../../assets/logo.png")}
+        source={require("../../assets/images/logo.png")}
         style={{
-          width: 150 ,
+          width: 150,
           height: 150,
           alignSelf: "center",
           marginBottom: 16,
@@ -130,9 +122,7 @@ export default function LoginScreen() {
           marginBottom: 20,
         }}
       >
-        <Text style={{ fontWeight: "500" }}>
-          Entrar con Google
-        </Text>
+        <Text style={{ fontWeight: "500" }}>Entrar con Google</Text>
       </Pressable>
 
       {/* Link a registro */}
