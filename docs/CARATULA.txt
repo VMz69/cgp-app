@@ -15,5 +15,5 @@ AV251709 - Milton Adalberto Ayala Ventura
 MA251192 - William Eduardo Montano Aguilar
 --------------------------------------------------------
 LINK REPOSITORIO DE PROYECTO:
-https://github.com/VMz69/shoping-cart
+https://github.com/VMz69/cgp-app.git
 --------------------------------------------------------
